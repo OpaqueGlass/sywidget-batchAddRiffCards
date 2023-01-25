@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>batch add riff cards 批量添加闪卡</title>
+    <link rel="stylesheet" href="./static/batchAddRiffCards.css" />
+</head>
+
+<body>
+    <div class="app">
+        <div id="mode_select_container">
+            <span id="text_select_mode"></span>
+            <select id="mode_select"></select>
+        </div>
+        <blockquote id="mode_intro_container">
+
+        </blockquote>
+        <div id="mode_config_container">
+
+        </div>
+        <div id="basic_info_container">
+
+        </div>
+        <div id="deck_select_container">
+            <span id="text_select_deck"></span>
+            <select id="deck_choice" name="decklist"></select>
+        </div>
+        <div id="debug_info">
+            <span id="error_info"></span><br/>
+            <span id="log_info"></span>
+        </div>
+        <div>
+            1.<button id="check_cards"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#31a1eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 2 2 4-4"></path><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"></path><path d="M16.5 9.4 7.55 4.24"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><line x1="12" y1="22" x2="12" y2="12"></line></svg></button>
+            → 2.<button id="start_add"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#31a1eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16h6"></path><path d="M19 13v6"></path><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"></path><path d="M16.5 9.4 7.55 4.24"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><line x1="12" y1="22" x2="12" y2="12"></line></svg></button>
+            <!-- /  <button id="start_remove"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#31a1eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 16h6"></path><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"></path><path d="M16.5 9.4 7.55 4.24"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><line x1="12" y1="22" x2="12" y2="12"></line></svg></button> -->
+            <button id="save_config"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#31a1eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg></button>
+        </div>
+        <div id="wait_for_add_preview">
+            <table id="preview_table">
+                <tr>
+                    <th>id</th>
+                    <th>内容预览</th>
+                    <th>操作</th>
+                </tr>
+            </table>
+        </div>
+    </div>
+    <script type="module" src="./src/main.js"></script>
+</body>
+
+</html>
