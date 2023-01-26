@@ -106,12 +106,20 @@ function changeMode() {
     if (g_widget_attr[`mode_config_${g_widget_attr.current_mode}`] != undefined) {
         g_my_mode.load(g_widget_attr["mode_config_" + g_my_mode.id]);
     }
+    // 适配深色模式
+    if (window.top.siyuan.config.appearance.mode == 1) {
+        document.getElementsByTagName("body")[0].style.color = "#c9d1d9";
+        document.querySelectorAll("select, input, textarea").forEach((elem)=>{
+            elem.classList.add("button_dark");
+        });
+    }
 }
 
 /**
  * 保存挂件设置到属性
  */
 async function setWidgetConfig() {
+    if (!isValidStr(g_widget_id)) return;
     // 补充或修改模式内部设置信息
     let modeConfig = g_my_mode.save();
     if (modeConfig != undefined && modeConfig != null) {
@@ -132,6 +140,7 @@ async function setWidgetConfig() {
  * @returns 
  */
 async function getWidgetConfig() {
+    if (!isValidStr(g_widget_id)) return;
     let response = await getblockAttrAPI(g_widget_id);
     let attrObject = {};
     if (WIDGET_ATTR_NAME in response.data) {

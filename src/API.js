@@ -277,7 +277,7 @@ export async function getCurrentDocIdF(){
     }catch(err){
         console.warn(err);
     }
-
+    
     //widgetId不存在，则使用老方法（存在bug：获取当前展示的页面id（可能不是挂件所在的id））
     if (!isValidStr(thisWidgetId)){
         try{

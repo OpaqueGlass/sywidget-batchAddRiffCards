@@ -96,14 +96,14 @@ input[type="checkbox"] {
 
 
 #preview_table tr:nth-child(even) {
-    background-color: #f2f2f2;
+    background-color: #f2f2f246;
 }
 
 #preview_table tr:nth-child(even) td:nth-child(3){
     text-align: right;
 }
 
-#preview_table tr:hover {background-color: #ddd;}
+#preview_table tr:hover {background-color: #dddddd46;}
 
 .ordinaryText_dark {
     color: darkgray;
