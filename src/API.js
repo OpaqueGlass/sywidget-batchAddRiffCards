@@ -259,7 +259,7 @@ export async function getCurrentDocIdF(){
         let queryResult = await queryAPI("SELECT root_id as parentId FROM blocks WHERE id = '" + thisWidgetId + "'");
         console.assert(queryResult != null && queryResult.length == 1, "SQL查询失败", queryResult);
         if (queryResult!= null && queryResult.length >= 1){
-            console.log("获取当前文档idBy方案A"+queryResult[0].parentId);
+            console.debug("获取当前文档idBy方案A"+queryResult[0].parentId);
             return queryResult[0].parentId;
         }
     }
@@ -269,7 +269,7 @@ export async function getCurrentDocIdF(){
             //通过获取挂件所在页面题头图的data-node-id获取文档id【安卓下跳转返回有问题，原因未知】
             let thisDocId = window.top.document.querySelector(`div.protyle-content:has(.iframe[data-node-id="${thisWidgetId}"]) .protyle-background`).getAttribute("data-node-id");
             if (isValidStr(thisDocId)){
-                console.log("获取当前文档idBy方案B" + thisDocId);
+                console.debug("获取当前文档idBy方案B" + thisDocId);
                 return thisDocId;
             }
         }
@@ -282,7 +282,7 @@ export async function getCurrentDocIdF(){
     if (!isValidStr(thisWidgetId)){
         try{
             thisDocId = window.top.document.querySelector(".layout__wnd--active .protyle.fn__flex-1:not(.fn__none) .protyle-background").getAttribute("data-node-id");
-            console.log("获取当前文档idBy方案C" + thisDocId);
+            console.debug("获取当前文档idBy方案C" + thisDocId);
         }catch(err){
             console.warn("获取当前文档id均失败");
             return null;

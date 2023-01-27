@@ -39,6 +39,10 @@ async function __init() {
     // 设置界面文字
     document.getElementById("text_select_mode").innerText = language["ui_select_mode"];
     document.getElementById("text_select_deck").innerText = language["ui_select_deck"];
+    document.getElementById("check_cards").title = language["ui_btn_preview"];
+    document.getElementById("start_add").title = language["ui_btn_add"];
+    document.getElementById("save_config").title = language["ui_btn_save_setting"];
+
     // 载入牌组列表
     refreshDecksList();
     // 对应到模式
@@ -65,7 +69,7 @@ async function __init() {
  * 一并从g_widget_attr中载入选择的牌组，请注意刷新前保存用户界面设置
  */
 async function refreshDecksList() {
-    pushLog("载入卡包信息中...");
+    pushLogF(language["info_loading_decks_info"]);
     let decksResponse = await getRiffDecks();
     let selectElem = document.getElementById("deck_choice");
     if (selectElem == null || selectElem == undefined) return;
@@ -78,9 +82,9 @@ async function refreshDecksList() {
     }
     g_deck_list_temp = decksResponse;
     // 载入牌组选择
-    console.log(decksResponse);
+    // console.debug(decksResponse);
     document.getElementById("deck_choice").value = g_widget_attr.target_deck_id;
-    pushLog("成功载入卡包信息");
+    pushLogF(language["info_loaded_decks_info"]);
     // setTimeout(()=>{console.log(document.decklist.select_deck.checked)}, 10000);
 }
 
@@ -132,7 +136,7 @@ async function setWidgetConfig() {
     if (response != 0) {
         throw Error(language["writeAttrFailed"]);
     }
-    console.log("写入挂件属性", attrString);
+    console.debug("写入挂件属性", attrString);
 }
 
 /**
@@ -153,15 +157,26 @@ async function getWidgetConfig() {
         Object.assign(g_widget_attr, attrObject);
     }
     if (!("id" in response.data)) {
-        throw Error(language["getAttrFailed"]);
+        throw Error(language["error_getAttrFailed"]);
     }
 }
 
-function getDocId() {
-
+function getOpenDocIds() {
+    let openedDocIds = new Array();
+    [].forEach.call(window.top.document.querySelectorAll(".protyle.fn__flex-1 .protyle-background"), (elem)=>{
+        if (isValidStr(elem.getAttribute("data-node-id"))) {
+            openedDocIds.push(elem.getAttribute("data-node-id"));
+        }
+    });
+    console.debug("已开启文档定位元素", window.top.document.querySelectorAll(".protyle.fn__flex-1 .protyle-background"));
+    console.debug("已开启文档id", openedDocIds);
+    return openedDocIds;
 }
 
-function pushLog(text = "") {
+function pushLogF(text = "", ...theArgs) {
+    for (const arg of theArgs) {
+        text = text.replace("@@", arg);
+    }
     document.getElementById("log_info").innerText = text;
 }
 
@@ -169,21 +184,17 @@ function pushError(text = "", timeout = 7000) {
     clearTimeout(g_error_info_timeout);
     document.getElementById("error_info").innerText = text;
     if (text != "" && timeout > 0) {
-        console.log("setTimeout");
         setTimeout(()=>{pushError("", 0)}, timeout);
     }
 }
 
 /**
- * 
+ * 移除预览的一个结果
  * @param {*} mouseEvent 
  */
 function removeOneResult(mouseEvent) {
-    console.log(mouseEvent);
-    console.log(this);
-    console.log(this.parentNode.parentNode);
     let tobeRemove = this.parentNode.parentNode.firstChild.innerText;
-    pushLog(`移除${this.parentNode.parentNode.firstChild.innerText}，剩余${document.getElementById("preview_table").childElementCount - 2}`);
+    pushLogF(language["info_remove_block"], this.parentNode.parentNode.firstChild.innerText, document.getElementById("preview_table").childElementCount - 2);
     document.getElementById("preview_table").removeChild(this.parentNode.parentNode);
     
 }
@@ -222,6 +233,7 @@ async function checkAdd() {
         openedDocIds: null,
     };
     scanAttr.currentDocId = await getCurrentDocIdF();
+    scanAttr.openedDocIds = getOpenDocIds();
     // 获取选择的牌组详情
     for (let oneDeckInfo of g_deck_list_temp) {
         if (oneDeckInfo.id == g_widget_attr.target_deck_id) {
@@ -229,15 +241,15 @@ async function checkAdd() {
             break;
         }
     }
-    
+    console.debug("获取基本信息", scanAttr);
     let blockInfos, deckId;
-    // TODO: 可选择的传入项目：目前选择的牌组id；所有牌组信息；所在文档（正在打开的文档）；所有已打开的文档
+    // 传入项目：目前选择的牌组id；所有牌组信息；所在文档（正在打开的文档）；所有已打开的文档
     try{
         [blockInfos, deckId] = await g_my_mode.scan(scanAttr);
     }catch(err) {
         console.warn(err);
         pushError(err.message);
-        pushLog("生成预览时发生错误");
+        pushLogF(language["error_gen_preview_failed"]);
         return;
     }
     
@@ -246,11 +258,15 @@ async function checkAdd() {
     let tableElem = document.getElementById("preview_table");
     // tableElem.innerHTML = "";
     tableElem.innerHTML = `<tr>
-    <th>id</th>
-    <th>内容预览</th>
-    <th>操作</th>
+    <th>${language["ui_table_id"]}</th>
+    <th>${language["ui_table_content_preview"]}</th>
+    <th>${language["ui_table_operation"]}</th>
 </tr>`;
+    let actualAddCount = 0;
     for (let i = 0; i < blockInfos.length; i++) {
+        if (!("id" in blockInfos[i])) {
+            continue;
+        }
         let oneRowElem = document.createElement("tr");
         let idColElem = document.createElement("td");
         let contentColElem = document.createElement("td");
@@ -261,7 +277,7 @@ async function checkAdd() {
         idColElem.classList.add("to-be-add-block-id");
         idColElem.onclick = goToOneBlockResult;
         contentColElem.innerText = blockInfos[i].content;
-        btnElem.innerText = "移除";
+        btnElem.innerText = language["ui_table_op_delete"];
         btnElem.onclick = removeOneResult;
         opColElem.appendChild(btnElem);
 
@@ -275,9 +291,10 @@ async function checkAdd() {
         // <td>${blockInfos[i].content}</td>
         // <td></td>
         // </tr>`);
+        actualAddCount++;
     }
     document.getElementById("deck_choice").value = deckId;
-    pushLog(`待添加卡牌预览已加载完成，检索到${blockInfos.length}个匹配块`);
+    pushLogF(language["info_preview_done"], actualAddCount);
     setWidgetConfig();
 }
 
@@ -293,7 +310,7 @@ async function doAdd() {
     });
 
     if (!isValidStr(blockIds) || blockIds.length <= 0) {
-        pushLog(language["hint_check_preview_first"]);
+        pushLogF(language["hint_check_preview_first"]);
         return;
     }
     // 寻找卡包信息
@@ -305,7 +322,7 @@ async function doAdd() {
         }
     }
     if (selectDeckInfo == null) {
-        pushLog("错误，指定的卡包不存在");
+        pushLogF(language["hint_deck_not_exist"]);
         return;
     }
     
@@ -313,7 +330,7 @@ async function doAdd() {
     // return;
     // 执行加入闪卡
     let afterAddSize = await addRiffCards(blockIds, deckId);
-    pushLog(`【添加成功】请求添加闪卡${blockIds.length}张，实际插入闪卡${afterAddSize - selectDeckInfo.size}张；`);
+    pushLogF(language["info_batch_add_done"], blockIds.length, afterAddSize - selectDeckInfo.size);
     
     console.log(blockIds);
 }
@@ -321,7 +338,7 @@ async function doAdd() {
 /*
 // oldVersion
 async function doAdd() {
-    pushLog("开始添加");
+    pushLogF("开始添加");
     // 获取用户的选择（牌组）
     g_widget_attr.target_deck_id = document.getElementById("deck_choice").value;
     // 刷新牌组列表，确保添加卡牌计数正确
@@ -348,11 +365,11 @@ async function doAdd() {
     console.log("scan返回", blockInfos, deckId);
     // return;
     if (!isValidStr(blockInfos) || blockInfos.length <= 0) {
-        pushLog(language["hint_block_not_found"]);
+        pushLogF(language["hint_block_not_found"]);
         return;
     }
     if (!isValidStr(deckId)) {
-        pushLog(language["hint_deck_not_selected"]);
+        pushLogF(language["hint_deck_not_selected"]);
         return;
     }
     let blockIds = blockInfos.map((value) => {
@@ -362,7 +379,7 @@ async function doAdd() {
     // 执行加入闪卡
     return;
     let afterAddSize = await addRiffCards(blockIds, deckId);
-    pushLog(`【添加成功】实际插入卡牌数：${afterAddSize - scanAttr.userSelectDeckInfo.size}；获取到符合条件的块数：${blockIds.length}；`);
+    pushLogF(`【添加成功】实际插入卡牌数：${afterAddSize - scanAttr.userSelectDeckInfo.size}；获取到符合条件的块数：${blockIds.length}；`);
     setWidgetConfig();
 }
 */
