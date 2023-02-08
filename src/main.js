@@ -36,13 +36,14 @@ async function __init() {
     document.getElementById("mode_select").onchange = changeMode;
     document.getElementById("check_cards").onclick = async function (){await checkAdd();};
     document.getElementById("save_config").onclick = setWidgetConfig;
+    document.getElementById("show_mode_intro").onclick = modeIntroDisplayer;
     // 设置界面文字
     document.getElementById("text_select_mode").innerText = language["ui_select_mode"];
     document.getElementById("text_select_deck").innerText = language["ui_select_deck"];
     document.getElementById("check_cards").title = language["ui_btn_preview"];
     document.getElementById("start_add").title = language["ui_btn_add"];
     document.getElementById("save_config").title = language["ui_btn_save_setting"];
-
+    document.getElementById("show_mode_intro").innerText = language["ui_show_mode_intro"];
     // 载入牌组列表
     refreshDecksList();
     // 对应到模式
@@ -177,7 +178,9 @@ function pushLogF(text = "", ...theArgs) {
     for (const arg of theArgs) {
         text = text.replace("@@", arg);
     }
-    document.getElementById("log_info").innerText = text;
+    let logAreaElem = document.getElementById("log_info");
+    logAreaElem.value = `${logAreaElem.value}\n${new Date().toLocaleTimeString()} I${text}`;
+    logAreaElem.scrollTop = logAreaElem.scrollHeight;
 }
 
 function pushError(text = "", timeout = 7000) {
@@ -185,6 +188,18 @@ function pushError(text = "", timeout = 7000) {
     document.getElementById("error_info").innerText = text;
     if (text != "" && timeout > 0) {
         setTimeout(()=>{pushError("", 0)}, timeout);
+    }
+}
+
+function modeIntroDisplayer() {
+    let elem = document.getElementById("show_mode_intro");
+    let containerElem = document.getElementById("mode_intro_container");
+    if (containerElem.style.display == "none") {
+        containerElem.style.display = "block";
+        elem.innerText = language["ui_hide_mode_intro"];
+    }else{
+        containerElem.style.display = "none";
+        elem.innerText = language["ui_show_mode_intro"];
     }
 }
 
@@ -230,9 +245,16 @@ async function checkAdd() {
         userSelectDeckId: g_widget_attr.target_deck_id,
         allDeckInfo: g_deck_list_temp,
         currentDocId: null,
+        currentDocBlockInfo: null,
         openedDocIds: null,
     };
     scanAttr.currentDocId = await getCurrentDocIdF();
+    scanAttr.currentDocBlockInfo = await queryAPI(`SELECT * FROM blocks WHERE id = '${scanAttr.currentDocId}' and type = 'd'`);
+    if (scanAttr.currentDocBlockInfo.length != 1) {
+        console.warn("当前文档id可能定位出错");
+    }else{
+        scanAttr.currentDocBlockInfo = scanAttr.currentDocBlockInfo[0];
+    }
     scanAttr.openedDocIds = getOpenDocIds();
     // 获取选择的牌组详情
     for (let oneDeckInfo of g_deck_list_temp) {
@@ -293,7 +315,16 @@ async function checkAdd() {
         // </tr>`);
         actualAddCount++;
     }
-    document.getElementById("deck_choice").value = deckId;
+    if (isValidStr(deckId)) {
+        document.getElementById("deck_choice").value = deckId;
+    }else{
+        // TODO: 自动判断卡包
+        deckId = await matchDeckByDocPath(scanAttr.currentDocId);
+        if (isValidStr(deckId)) {
+            document.getElementById("deck_choice").value = deckId;
+            pushLogF("自动修改了对应卡包");
+        }
+    }
     pushLogF(language["info_preview_done"], actualAddCount);
     setWidgetConfig();
 }
@@ -333,6 +364,40 @@ async function doAdd() {
     pushLogF(language["info_batch_add_done"], blockIds.length, afterAddSize - selectDeckInfo.size);
     
     console.log(blockIds);
+}
+
+/**
+ * 根据文档路径判断卡包
+ * @param {*} docId 
+ */
+async function matchDeckByDocPath(docId) {
+    let queryCurDoc = await queryAPI(`SELECT * FROM blocks WHERE id = '${docId}'`);
+    let curDocHPath = queryCurDoc[0].hpath;
+    let folderItemOfHPath = curDocHPath.split("/");
+    // 路径联合匹配
+    for (let oneDeckInfo of g_deck_list_temp) {
+        if (oneDeckInfo.name.includes("/")) {
+            if (curDocHPath.indexOf(oneDeckInfo.name) != -1) {
+                pushLogF("路径联合匹配到卡包");
+                return oneDeckInfo.id;
+            }
+        }
+    }
+    
+    // 路径单项匹配
+    for (let i = folderItemOfHPath.length - 1; i > 0; i--) {
+        for (let oneDeckInfo of g_deck_list_temp) {
+            let splitedDeckName = oneDeckInfo.name.split("/");
+            for (let oneSpliteDeckName of splitedDeckName) {
+                if (isValidStr(oneSpliteDeckName) && folderItemOfHPath[i].indexOf(oneSpliteDeckName) != -1) {
+                    pushLogF("路径单项匹配到卡包");
+                    return oneDeckInfo.id;
+                }
+            }
+        }
+    }
+    pushLogF("没有匹配的卡包");
+    return undefined;
 }
 
 /*

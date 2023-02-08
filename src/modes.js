@@ -1,16 +1,16 @@
 import { getCurrentDocIdF, queryAPI } from "./API.js";
-import { language } from "./config.js";
+import { language, setting } from "./config.js";
 import { tabHandler } from "./uncommon.js";
 
 class ModeExample {
     static id = -1;
     id = -1;
     // 模式所需要的初始化工作，包括向模式设置区
-    async init() {
-        console.log("INIT")
+    init() {
+        console.log("INIT");
     }
     // 移除模式时所做的工作
-    async destory() {
+    destory() {
         
     }
     // 载入模式内部设置
@@ -22,12 +22,12 @@ class ModeExample {
         return undefined;
     }
     // 执行，请返回要被创建为闪卡的块id数组
-    async scan() {
-
+    async scan(scanAttr) {
+        return [["20230201214304-2dllohm"], undefined];
     }
 }
 
-class HeadingMode {
+class HeadingMode extends ModeExample{
     static id = 1;
     id = 1;
     modeSettings = {};
@@ -67,41 +67,32 @@ class HeadingMode {
         // let result = queryResult.map((curValue, index) => {
         //     return curValue.id;
         // });
-        return [queryResult, scanAttr.userSelectDeckId];
+        return [queryResult, undefined];
     }
 }
 
-class SuperBlockMode {
+class SuperBlockMode extends ModeExample {
     static id = 2;
     id = 2;
     // 模式所需要的初始化工作，包括向模式设置区
     init() {
         let containerElem = document.getElementById("mode_config_container");
         containerElem.innerHTML = `
-        <span>${language["mode1_include_child_docs"]}</span><input type="checkbox" id="mode_include_child_doc" />`;
+        <span>${language["mode1_include_child_docs"]}</span><input type="checkbox" id="mode_include_child_doc" />
+        <span>${language["mode2_match_qa_pattern"]}</span><input type="checkbox" id="mode_match_qa_pattern" />
+        `;
         console.log("INIT超级块模式");
-    }
-    // 移除模式时所做的工作
-    destory() {
-        
-    }
-    // 载入模式内部设置
-    load(modeSettings) {
-
-    }
-    // 保存模式内部设置，请返回一个对象，由挂件保存
-    save() {
-        return undefined;
     }
     // 执行，请返回要被创建为闪卡的块信息数组
     async scan(scanAttr) {
         let parentDistinct = document.getElementById("mode_include_child_doc").checked ? "%" : ".sy";
-        let queryResult = await queryAPI(`select * from blocks where path like '%${scanAttr.currentDocId}${parentDistinct}' and type = 's';`);
-        return [queryResult, scanAttr.userSelectDeckId];
+        let qaPatternDistince = document.getElementById("mode_match_qa_pattern").checked ? `AND content regexp '${setting.in_mode_setting.mode6_qa_pattern}'` : "";
+        let queryResult = await queryAPI(`select * from blocks where path like '%${scanAttr.currentDocId}${parentDistinct}' and type = 's' ${qaPatternDistince};`);
+        return [queryResult, undefined];
     }
 }
 
-class SQLMode {
+class SQLMode extends ModeExample {
     static id = 3;
     id = 3;
     // 模式所需要的初始化工作，包括向模式设置区
@@ -134,20 +125,19 @@ class SQLMode {
                 , `${JSON.stringify(scanAttr.openedDocIds).replace(new RegExp("[\\[\\]]", "g"), "")}`);
         console.log("SQL:", sqlStmt);
         let queryResult = await queryAPI(sqlStmt);
-        return [queryResult, scanAttr.userSelectDeckId];
+        return [queryResult, undefined];
     }
 }
 
-class TagMode {
+class TagMode extends ModeExample {
     static id = 4;
     id = 4;
     modeSettings = {};
     // 模式所需要的初始化工作，包括向模式设置区
     init() {
         let containerElem = document.getElementById("mode_config_container");
-        containerElem.innerHTML = `<span>${language["mode4_input_tag_name"]}</span><input id="mode_tag_name">
-        </input>`;
-        console.log("INIT标题模式");
+        containerElem.innerHTML = `<span>${language["mode4_input_tag_name"]}</span><input id="mode_tag_name"></input>`;
+        console.log("INIT标签模式");
     }
     // 移除模式时所做的工作
     destory() {
@@ -166,10 +156,47 @@ class TagMode {
     // 执行，请返回要被创建为闪卡的块信息数组
     async scan(scanAttr) {
         let tagName = document.getElementById("mode_tag_name").value;
-        let queryResult = await queryAPI(`select * from blocks where tag like "%#${tagName}#%" and parent_id not in (select id from blocks where tag like "%#${tagName}#%")`);
-        return [queryResult, scanAttr.userSelectDeckId];
+        let queryResult = await queryAPI(`select * from blocks where tag like "%#${tagName}#%" and ial not like "%custom-riff-decks%" and parent_id not in (select id from blocks where tag like "%#${tagName}#%")`);
+        return [queryResult, undefined];
     }
 }
 
-const MODES = [HeadingMode, SuperBlockMode, SQLMode, TagMode];
+/* BUG: 可能匹配到行内代码，示例：`==aaa==` */
+class HighLightMode extends ModeExample {
+    static id = 5;
+    id = 5;
+    modeSettings = {};
+    // 模式所需要的初始化工作，包括向模式设置区
+    init() {
+        console.log("INIT高亮标记模式");
+    }
+    // 执行，请返回要被创建为闪卡的块信息数组
+    async scan(scanAttr) {
+        let queryResult = await queryAPI(`SELECT * FROM blocks WHERE root_id = '${scanAttr.currentDocId}' and type = "p" and markdown regexp '==.*=='`);
+        return [queryResult, undefined];
+    }
+}
+
+class ListItemQAFormatMode extends ModeExample {
+    static id = 6;
+    id = 6;
+    modeSettings = {};
+    // 模式所需要的初始化工作，包括向模式设置区
+    init() {
+        console.log("INIT列表QA模式");
+    }
+    // 执行，请返回要被创建为闪卡的块信息数组
+    async scan(scanAttr) {
+        let queryResult = await queryAPI(`SELECT * FROM blocks
+        WHERE
+            root_id  = "${scanAttr.currentDocId}"
+        AND
+            type = 'i'
+        AND
+            content regexp '${setting.in_mode_setting.mode6_qa_pattern}'`);
+        return [queryResult, undefined];
+    }
+} 
+
+const MODES = [HeadingMode, SuperBlockMode, SQLMode, TagMode/*, HighLightMode*/, ListItemQAFormatMode];
 export { MODES };

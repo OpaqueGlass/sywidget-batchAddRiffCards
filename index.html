@@ -13,8 +13,9 @@
         <div id="mode_select_container">
             <span id="text_select_mode"></span>
             <select id="mode_select"></select>
+            <span id="show_mode_intro"></span>
         </div>
-        <blockquote id="mode_intro_container">
+        <blockquote id="mode_intro_container" style="display: none;">
 
         </blockquote>
         <div id="mode_config_container">
@@ -26,10 +27,12 @@
         <div id="deck_select_container">
             <span id="text_select_deck"></span>
             <select id="deck_choice" name="decklist"></select>
+            <span id="text_auto_match_deck"></span>
+            <input type="checkbox" id="auto_match_deck" />
         </div>
         <div id="debug_info">
             <span id="error_info"></span><br/>
-            <span id="log_info"></span>
+            <textarea disabled id="log_info" rows="2" cols="60"></textarea>
         </div>
         <div>
             <span>1.</span><button id="check_cards"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#31a1eb" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 2 2 4-4"></path><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"></path><path d="M16.5 9.4 7.55 4.24"></path><polyline points="3.29 7 12 12 20.71 7"></polyline><line x1="12" y1="22" x2="12" y2="12"></line></svg></button>

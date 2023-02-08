@@ -16,7 +16,9 @@ let widgetDistinctSetting = {
 };
 // 全局设置
 let setting = {
-    
+    in_mode_setting: {
+        mode6_qa_pattern: "^(Q|Question|q|question|问题|问)(:|：| )",
+    },
 };
 //全局设置
 let token = "";//API鉴权token，可以不填的样子（在设置-关于中查看）
@@ -31,11 +33,15 @@ let zh_CN = {
     ui_btn_preview: "检索并生成预览",
     ui_btn_add: "执行批量添加",
     ui_btn_save_setting: "保存设置",
+    ui_show_mode_intro: "[显示提示]",
+    ui_hide_mode_intro: "[隐藏提示]",
     // 模式名称 mode names
     mode1: "标题（当前文档）",
     mode2: "超级块（当前文档）",
     mode3: "SQL",
     mode4: "标签（实验性）",
+    mode5: "带标记段落块（当前文档）",
+    mode6: "QA列表项",
     // 提示词 hint word
     hint_block_not_found: "【添加失败】未找到符合条件的块",
     hint_deck_not_selected: "【添加失败】未选择目标卡包",
@@ -51,6 +57,7 @@ let zh_CN = {
     // 模式内部提示词 words in modes
     mode1_select_heading: "选择标题：",
     mode1_include_child_docs: "包括子文档",
+    mode2_match_qa_pattern: "匹配问题模式",
     mode4_input_tag_name: "标签全称：",
     // 模式简要介绍词 introductions for modes
     mode1_introduction: "为当前文档的所有指定标题制卡",
@@ -61,8 +68,23 @@ let zh_CN = {
                 <li><code>@CUR_DOC@</code> 将被替换为当前文档id，例 <code>20230119224224-zxlrw2q</code></li>
                 <li><code>@ALL_OPEN_DOC@</code> 将被替换为所有已打开文档id\*，例 <code>"20230119224224-zxlrw2q", "20230125123155-0v7lfcs"</code></li>
             </ul>`,
-    mode4_introduction: "🧪❕实验性功能，功能最终表现可能不符合预期。<br/>为所有含指定标签的块制卡（存在嵌套关系的块，只对最外层块制卡）。标签名应当为全称，例 <code>RiffCards/Java</code>。",
-
+    mode4_introduction: "🧪❕实验性功能，功能最终表现可能不符合预期。<br/>为所有含指定标签的块制卡（存在嵌套关系的块，只对最外层块制卡；排除已被制卡的块）。标签名应当为全称，例 <code>RiffCards/Java</code>。",
+    mode5_introduction: "🧪❕实验性功能，功能最终表现可能不符合预期。<br/>为当前文档下所有带高亮标记的段落块制卡",
+    mode6_introduction: `🧪❕实验性功能，功能最终表现可能不符合预期。<br/>为当前文档下所有满足以下格式的列表项块制卡<br/>
+        <ul>
+            <li>问题和答案位于同一个列表中；</li>
+            <li>答案为问题的子列表（项）[答案和问题不平级]；</li>
+            <li>问题占据一个列表项，其内容满足正则表达式<code>^(Q|Question|q|question|问题|问)(:|：| )</code>；</li>
+        </ul>
+        示例：
+        <ul>
+            <li>Q: 什么是实验性功能？
+                <ul>
+                    <li>功能可能存在问题，导致结果不符合预期或不符合说明；功能的效果随时调整，开发者也可能移除此功能；</li>
+                </ul>
+            </li>
+        </ul>
+    `,
 };
 let en_US = {//先当他不存在 We don't fully support English yet.
     

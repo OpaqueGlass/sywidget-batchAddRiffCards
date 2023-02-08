@@ -133,6 +133,14 @@ input[type="checkbox"] {
     text-align: center;
 }
 
+#show_mode_intro {
+    user-select: none;
+    font-size: small;
+}
+
+#show_mode_intro:hover {
+    color: #0fa15d;
+}
 
 body {
     padding: 0;

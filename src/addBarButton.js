@@ -52,8 +52,8 @@ barButton.addEventListener(
     function (e) {
         e.stopPropagation();
         if (batchAddPanel.style.display === "none") {
-            adjustPanelPosition(barButton, batchAddPanel);
             batchAddPanel.style.display = "block";
+            adjustPanelPosition(barButton, batchAddPanel);
             window.addEventListener("click", hideBatchAddPanel, false);
         } else {
             batchAddPanel.style.display = "none";
@@ -71,6 +71,7 @@ function hideBatchAddPanel(e) {
 
 /**
  * 面板位置调整，尽力调整到面板居中显示在按钮下方
+ * 为获取面板宽度，面板应先可视
  * @author OpaqueGlass
  * @param {*} btnElem 
  * @param {*} panelElem 
