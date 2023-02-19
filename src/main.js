@@ -14,6 +14,7 @@ import {
 import { widgetDistinctSetting, language, setting } from './config.js';
 import { isSafelyUpdate, isValidStr, transfromAttrToIAL } from './common.js';
 import { MODES } from './modes.js';
+import { showFloatWnd } from './ref-utils.js';
 let g_widget_attr = widgetDistinctSetting;
 let g_widget_id = "";
 let g_deck_list_temp;
@@ -37,6 +38,7 @@ async function __init() {
     document.getElementById("check_cards").onclick = async function (){await checkAdd();};
     document.getElementById("save_config").onclick = setWidgetConfig;
     document.getElementById("show_mode_intro").onclick = modeIntroDisplayer;
+    document.getElementById("auto_match_deck").onchange = (event) => {g_widget_attr.auto_match_deck = event.target.checked;};
     // 设置界面文字
     document.getElementById("text_select_mode").innerText = language["ui_select_mode"];
     document.getElementById("text_select_deck").innerText = language["ui_select_deck"];
@@ -44,6 +46,7 @@ async function __init() {
     document.getElementById("start_add").title = language["ui_btn_add"];
     document.getElementById("save_config").title = language["ui_btn_save_setting"];
     document.getElementById("show_mode_intro").innerText = language["ui_show_mode_intro"];
+    document.getElementById("text_auto_match_deck").innerText = language["ui_enable_match_deck"];
     // 载入牌组列表
     refreshDecksList();
     // 对应到模式
@@ -52,6 +55,7 @@ async function __init() {
         document.getElementById("mode_select").insertAdjacentHTML("beforeend", `<option value="${oneMode.id}">${language["mode" + oneMode.id]}</option>`);
     }
     document.getElementById("mode_select").value = g_widget_attr.current_mode.toString();
+    document.getElementById("auto_match_deck").checked = g_widget_attr["auto_match_deck"];
     // 初始化模式
     changeMode();
     // 载入模式内设定
@@ -219,7 +223,6 @@ function removeOneResult(mouseEvent) {
  */
 function goToOneBlockResult(mouseEvent) {
     let id = this.innerText;
-    // 处理笔记本等无法跳转的情况
     if (!isValidStr(id)) return;
     let virtualLink =  window.parent.document.createElement("span");
     virtualLink.setAttribute("data-type","block-ref")
@@ -229,7 +232,16 @@ function goToOneBlockResult(mouseEvent) {
     tempAddTarget.appendChild(virtualLink);
     virtualLink.click();
     virtualLink.remove();
+}
 
+function popOneBlockResult(mouseEvent) {
+    if (mouseEvent.buttons == 2) {
+        let id = this.innerText;
+        // 处理笔记本等无法跳转的情况
+        if (!isValidStr(id)) return;
+        mouseEvent.target.setAttribute("data-node-id", id);
+        showFloatWnd(mouseEvent);
+    }
 }
 
 /**
@@ -298,6 +310,7 @@ async function checkAdd() {
         idColElem.innerText = blockInfos[i].id;
         idColElem.classList.add("to-be-add-block-id");
         idColElem.onclick = goToOneBlockResult;
+        idColElem.onmousedown = popOneBlockResult;
         contentColElem.innerText = blockInfos[i].content;
         btnElem.innerText = language["ui_table_op_delete"];
         btnElem.onclick = removeOneResult;
@@ -317,7 +330,7 @@ async function checkAdd() {
     }
     if (isValidStr(deckId)) {
         document.getElementById("deck_choice").value = deckId;
-    }else{
+    }else if (g_widget_attr["auto_match_deck"]){
         // TODO: 自动判断卡包
         deckId = await matchDeckByDocPath(scanAttr.currentDocId);
         if (isValidStr(deckId)) {
@@ -390,7 +403,7 @@ async function matchDeckByDocPath(docId) {
             let splitedDeckName = oneDeckInfo.name.split("/");
             for (let oneSpliteDeckName of splitedDeckName) {
                 if (isValidStr(oneSpliteDeckName) && folderItemOfHPath[i].indexOf(oneSpliteDeckName) != -1) {
-                    pushLogF("路径单项匹配到卡包");
+                    pushLogF("路径单项匹配到卡包[@@,@@]", oneSpliteDeckName, folderItemOfHPath[i]);
                     return oneDeckInfo.id;
                 }
             }

@@ -173,10 +173,23 @@ class HighLightMode extends ModeExample {
     // 执行，请返回要被创建为闪卡的块信息数组
     async scan(scanAttr) {
         let queryResult = await queryAPI(`SELECT * FROM blocks WHERE root_id = '${scanAttr.currentDocId}' and type = "p" and markdown regexp '==.*=='`);
-        return [queryResult, undefined];
+        console.log(queryResult);
+        let finalResult = new Array();
+        queryResult.forEach((oneResult) => {
+            let oneContent = oneResult.markdown;
+            console.log(`[正则检查]原内容`, oneContent);
+            oneContent = oneContent.replace(new RegExp("(?!<\\\\)`[^`]*`(?!`)", "g"), "");
+            console.log(`[正则检查]移除行内代码`, oneContent);
+            let regExp = new RegExp("(?<!\\\\)==[^=]*[^\\\\]==");
+            console.log(`[正则检查]重新匹配高亮`, oneContent.match(regExp));
+            if (oneContent.match(regExp) != null) {
+                finalResult.push(oneResult);
+            }
+        });
+        return [finalResult, undefined];
     }
 }
-
+/* 匹配问题模式列表项制卡 */
 class ListItemQAFormatMode extends ModeExample {
     static id = 6;
     id = 6;
@@ -198,5 +211,12 @@ class ListItemQAFormatMode extends ModeExample {
     }
 } 
 
-const MODES = [HeadingMode, SuperBlockMode, SQLMode, TagMode/*, HighLightMode*/, ListItemQAFormatMode];
+const MODES = [
+    HeadingMode, 
+    SuperBlockMode, 
+    SQLMode, 
+    TagMode, 
+    HighLightMode, 
+    ListItemQAFormatMode
+];
 export { MODES };

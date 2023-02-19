@@ -126,6 +126,9 @@ input[type="checkbox"] {
     border-bottom: 1px dashed rgba(0, 0, 0, .1);
 }
 
+.canClick {
+    cursor: pointer;
+}
 
 /* 错误提示文字样式 */
 .errorinfo {

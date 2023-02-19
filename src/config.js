@@ -12,7 +12,7 @@
 let widgetDistinctSetting = {
     target_deck_id: "", // 添加到目标卡组
     current_mode: "1", // 批量查询插入块模式
-
+    auto_match_deck: false, 
 };
 // 全局设置
 let setting = {
@@ -33,8 +33,9 @@ let zh_CN = {
     ui_btn_preview: "检索并生成预览",
     ui_btn_add: "执行批量添加",
     ui_btn_save_setting: "保存设置",
-    ui_show_mode_intro: "[显示提示]",
-    ui_hide_mode_intro: "[隐藏提示]",
+    ui_show_mode_intro: "[显示模式说明]",
+    ui_hide_mode_intro: "[隐藏模式说明]",
+    ui_enable_match_deck: "启用卡包匹配",
     // 模式名称 mode names
     mode1: "标题（当前文档）",
     mode2: "超级块（当前文档）",
@@ -60,17 +61,19 @@ let zh_CN = {
     mode2_match_qa_pattern: "匹配问题模式",
     mode4_input_tag_name: "标签全称：",
     // 模式简要介绍词 introductions for modes
-    mode1_introduction: "为当前文档的所有指定标题制卡",
-    mode2_introduction: "为当前文档的所有超级块制卡",
-    mode3_introduction: `通过SQL对符合条件的块制卡<br/>
+    mode1_introduction: "将当前文档的所有指定标题添加为闪卡。<br/><em>注：为了使用标题复习，仍需要高亮标题下内容，或手动折叠标题块。</em>",
+    mode2_introduction: "将当前文档的所有超级块添加为闪卡",
+    mode3_introduction: `通过SQL将符合条件的块添加为闪卡<br/>
             支持部分关键词：
             <ul>
                 <li><code>@CUR_DOC@</code> 将被替换为当前文档id，例 <code>20230119224224-zxlrw2q</code></li>
                 <li><code>@ALL_OPEN_DOC@</code> 将被替换为所有已打开文档id\*，例 <code>"20230119224224-zxlrw2q", "20230125123155-0v7lfcs"</code></li>
             </ul>`,
-    mode4_introduction: "🧪❕实验性功能，功能最终表现可能不符合预期。<br/>为所有含指定标签的块制卡（存在嵌套关系的块，只对最外层块制卡；排除已被制卡的块）。标签名应当为全称，例 <code>RiffCards/Java</code>。",
-    mode5_introduction: "🧪❕实验性功能，功能最终表现可能不符合预期。<br/>为当前文档下所有带高亮标记的段落块制卡",
-    mode6_introduction: `🧪❕实验性功能，功能最终表现可能不符合预期。<br/>为当前文档下所有满足以下格式的列表项块制卡<br/>
+    mode4_introduction: "🧪❕实验性功能，功能最终表现可能不符合预期。<br/>将所有含指定标签的块添加为闪卡（存在嵌套关系的块，只对最外层块制卡；排除已被制卡的块）。标签名应当为全称，例 <code>RiffCards/Java</code>。",
+    mode5_introduction: "🧪❕实验性功能，功能最终表现可能不符合预期。<br/>将当前文档下所有带高亮标记的段落块添加为闪卡",
+    mode6_introduction: `🧪❕实验性功能，功能最终表现可能不符合预期。<br/>
+    <em>注：为了使用列表项块复习，请使用思源v2.7.6及以上版本，否则仍需要高亮子列表项下内容，或手动折叠子列表项。</em><br />
+        为当前文档下所有满足以下格式的列表项块制卡<br/>
         <ul>
             <li>问题和答案位于同一个列表中；</li>
             <li>答案为问题的子列表（项）[答案和问题不平级]；</li>
