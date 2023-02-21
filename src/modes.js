@@ -52,12 +52,14 @@ class HeadingMode extends ModeExample{
     }
     // 载入模式内部设置
     load(modeSettings) {
-        document.getElementById("mode_heading").value = modeSettings.mode_heading
+        document.getElementById("mode_heading").value = modeSettings.mode_heading;
+        document.getElementById("mode_include_child_doc").checked = modeSettings["mode_include_child_doc"];
     }
     // 保存模式内部设置，请返回一个对象，由挂件保存
     save() {
         return {
-            mode_heading: document.getElementById("mode_heading").value
+            mode_heading: document.getElementById("mode_heading").value,
+            mode_include_child_doc: document.getElementById("mode_include_child_doc").checked
         }
     }
     // 执行，请返回要被创建为闪卡的块id数组
@@ -136,7 +138,8 @@ class TagMode extends ModeExample {
     // 模式所需要的初始化工作，包括向模式设置区
     init() {
         let containerElem = document.getElementById("mode_config_container");
-        containerElem.innerHTML = `<span>${language["mode4_input_tag_name"]}</span><input id="mode_tag_name"></input>`;
+        containerElem.innerHTML = `<span>${language["mode4_input_tag_name"]}</span><input type="text" id="mode_tag_name"></input>
+        <span>${language["mode4_except_exist"]}</span><input id="mode_except_exist" type="checkbox"></input>`;
         console.log("INIT标签模式");
     }
     // 移除模式时所做的工作
@@ -145,18 +148,25 @@ class TagMode extends ModeExample {
     }
     // 载入模式内部设置
     load(modeSettings) {
-        document.getElementById("mode_tag_name").value = modeSettings.mode_tag_name
+        document.getElementById("mode_tag_name").value = modeSettings["mode_tag_name"];
+        document.getElementById("mode_except_exist").checked = modeSettings["mode_except_exist"];
     }
     // 保存模式内部设置，请返回一个对象，由挂件保存
     save() {
         return {
-            mode_tag_name: document.getElementById("mode_tag_name").value
+            mode_tag_name: document.getElementById("mode_tag_name").value,
+            mode_except_exist: document.getElementById("mode_except_exist").checked
         }
     }
     // 执行，请返回要被创建为闪卡的块信息数组
     async scan(scanAttr) {
         let tagName = document.getElementById("mode_tag_name").value;
-        let queryResult = await queryAPI(`select * from blocks where tag like "%#${tagName}#%" and ial not like "%custom-riff-decks%" and parent_id not in (select id from blocks where tag like "%#${tagName}#%")`);
+        let sqlSnip = "";
+        if (document.getElementById("mode_except_exist").checked) {
+            sqlSnip = `and ial not like "%custom-riff-decks%"`;
+        }
+        let queryResult = await queryAPI(`select * from blocks where tag like "%#${tagName}#%" ${sqlSnip} and parent_id not in (select id from blocks where tag like "%#${tagName}#%")`);
+        console.log(queryResult);
         return [queryResult, undefined];
     }
 }
@@ -168,22 +178,43 @@ class HighLightMode extends ModeExample {
     modeSettings = {};
     // 模式所需要的初始化工作，包括向模式设置区
     init() {
+        let containerElem = document.getElementById("mode_config_container");
+        containerElem.innerHTML = `
+        <span>${language["mode1_include_child_docs"]}</span><input type="checkbox" id="mode_include_child_doc" />
+        `;
         console.log("INIT高亮标记模式");
+    }
+    // 载入模式内部设置
+    load(modeSettings) {
+        document.getElementById("mode_include_child_doc").checked = modeSettings["mode_include_child_doc"];
+    }
+    // 保存模式内部设置，请返回一个对象，由挂件保存
+    save() {
+        return {
+            mode_include_child_doc: document.getElementById("mode_include_child_doc").checked
+        }
     }
     // 执行，请返回要被创建为闪卡的块信息数组
     async scan(scanAttr) {
-        let queryResult = await queryAPI(`SELECT * FROM blocks WHERE root_id = '${scanAttr.currentDocId}' and type = "p" and markdown regexp '==.*=='`);
-        console.log(queryResult);
+        let parentDistinct = document.getElementById("mode_include_child_doc").checked ? "%" : ".sy";
+        let queryResult = await queryAPI(`SELECT * FROM blocks WHERE 
+            path like '%${scanAttr.currentDocId}${parentDistinct}' 
+        AND 
+            type = "p" 
+        AND 
+            markdown regexp '==.*=='`);
         let finalResult = new Array();
         queryResult.forEach((oneResult) => {
             let oneContent = oneResult.markdown;
-            console.log(`[正则检查]原内容`, oneContent);
+            // console.log(`[正则检查]原内容`, oneContent);
             oneContent = oneContent.replace(new RegExp("(?!<\\\\)`[^`]*`(?!`)", "g"), "");
-            console.log(`[正则检查]移除行内代码`, oneContent);
+            // console.log(`[正则检查]移除行内代码`, oneContent);
             let regExp = new RegExp("(?<!\\\\)==[^=]*[^\\\\]==");
-            console.log(`[正则检查]重新匹配高亮`, oneContent.match(regExp));
+            // console.log(`[正则检查]重新匹配高亮`, oneContent.match(regExp));
             if (oneContent.match(regExp) != null) {
                 finalResult.push(oneResult);
+            }else{
+                console.log(`[正则检查]认为【${oneResult.markdown}】不是高亮，\n（移除行内代码后 【${oneContent}】 ）`)
             }
         });
         return [finalResult, undefined];
@@ -196,13 +227,28 @@ class ListItemQAFormatMode extends ModeExample {
     modeSettings = {};
     // 模式所需要的初始化工作，包括向模式设置区
     init() {
+        let containerElem = document.getElementById("mode_config_container");
+        containerElem.innerHTML = `
+        <span>${language["mode1_include_child_docs"]}</span><input type="checkbox" id="mode_include_child_doc" />
+        `;
         console.log("INIT列表QA模式");
+    }
+    // 载入模式内部设置
+    load(modeSettings) {
+        document.getElementById("mode_include_child_doc").checked = modeSettings["mode_include_child_doc"];
+    }
+    // 保存模式内部设置，请返回一个对象，由挂件保存
+    save() {
+        return {
+            mode_include_child_doc: document.getElementById("mode_include_child_doc").checked
+        }
     }
     // 执行，请返回要被创建为闪卡的块信息数组
     async scan(scanAttr) {
+        let parentDistinct = document.getElementById("mode_include_child_doc").checked ? "%" : ".sy";
         let queryResult = await queryAPI(`SELECT * FROM blocks
         WHERE
-            root_id  = "${scanAttr.currentDocId}"
+            path like "%${scanAttr.currentDocId}${parentDistinct}"
         AND
             type = 'i'
         AND

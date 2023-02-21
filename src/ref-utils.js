@@ -55,21 +55,21 @@ export function showFloatWnd(event){
     window.frameElement.parentElement.parentElement.classList.remove("protyle-wysiwyg--hl");
     //搬运过来有修改，和上面的修改有点...冲突，此部分充满了玄学
     //强制重设popover位置，间隔5ms，重设时间1.2s
-    let interval = setInterval( ()=>{
-        //参考了https://github.com/leolee9086/cc-template/blob/6909dac169e720d3354d77685d6cc705b1ae95be/index.html#L102-L117
-        let panel = 思源主界面.querySelector(`.block__popover[data-oid="${linkId}"]`);
-        if (panel) {
-            console.log("Reset",Y,X)
-            panel.style.top = Y + 36 + "px";//呃，不再覆盖链接试一下
-            let left = X - (panel.offsetWidth / 2 || 0);
-            if (left < 0) left = 0;
-            panel.style.left = left + "px";
-            panel.style.maxHeight  = (window.innerHeight - panel.getBoundingClientRect().top - 8) + "px";
-            linkId = "";
-        }
-    }, 5);
+    // let interval = setInterval( ()=>{
+    //     //参考了https://github.com/leolee9086/cc-template/blob/6909dac169e720d3354d77685d6cc705b1ae95be/index.html#L102-L117
+    //     let panel = 思源主界面.querySelector(`.block__popover[data-oid="${linkId}"]`);
+    //     if (panel) {
+    //         console.log("Reset",Y,X)
+    //         panel.style.top = Y + 36 + "px";//呃，不再覆盖链接试一下
+    //         let left = X - (panel.offsetWidth / 2 || 0);
+    //         if (left < 0) left = 0;
+    //         panel.style.left = left + "px";
+    //         panel.style.maxHeight  = (window.innerHeight - panel.getBoundingClientRect().top - 8) + "px";
+    //         linkId = "";
+    //     }
+    // }, 5);
     setTimeout( ()=> {虚拟链接.remove();}, 3000);
-    setTimeout(()=>{clearInterval(interval);}, 1200);//移除重设定时器
+    // setTimeout(()=>{clearInterval(interval);}, 1200);//移除重设定时器
     // console.log("test", window.top.siyuan.blockPanels);
     // 可以考虑由挂件移除blockPanel，但触发事件不好确定
     // } else (this.链接id = "")
@@ -138,7 +138,7 @@ let 获取元素绝对坐标 = function(element) {
  */
 let 获取文档元素 = function(element) {
     let docElement = {};
-    while (element.className != "protyle-content" && element) {
+    while (element?.className && !element.className?.includes("protyle-content")) {
         element = element.parentElement;
     }
     docElement = element;

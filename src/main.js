@@ -56,6 +56,7 @@ async function __init() {
     }
     document.getElementById("mode_select").value = g_widget_attr.current_mode.toString();
     document.getElementById("auto_match_deck").checked = g_widget_attr["auto_match_deck"];
+    document.getElementById("deck_choice").value = g_widget_attr["target_deck_id"];
     // 初始化模式
     changeMode();
     // 载入模式内设定
@@ -76,6 +77,13 @@ async function __init() {
 async function refreshDecksList() {
     pushLogF(language["info_loading_decks_info"]);
     let decksResponse = await getRiffDecks();
+    if (decksResponse != null || decksResponse != undefined) {
+        decksResponse.push({
+            "name": "Built-in Deck",
+            "id": "20230218211946-2kw8jgx",
+            "size": NaN
+        })
+    }
     let selectElem = document.getElementById("deck_choice");
     if (selectElem == null || selectElem == undefined) return;
     selectElem.innerHTML = "";
