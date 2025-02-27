@@ -12,7 +12,7 @@ import {
     addRiffCards
 } from './API.js';
 import { widgetDistinctSetting, language, setting } from './config.js';
-import { isSafelyUpdate, isValidStr, transfromAttrToIAL } from './common.js';
+import { debugPush, isSafelyUpdate, isValidStr, logPush, transfromAttrToIAL } from './common.js';
 import { MODES } from './modes.js';
 import { showFloatWnd } from './ref-utils.js';
 let g_widget_attr = widgetDistinctSetting;
@@ -51,7 +51,7 @@ async function __init() {
     refreshDecksList();
     // 对应到模式
     for (let oneMode of MODES) {
-        // console.log(oneMode.name);
+        // logPush(oneMode.name);
         document.getElementById("mode_select").insertAdjacentHTML("beforeend", `<option value="${oneMode.id}">${language["mode" + oneMode.id]}</option>`);
     }
     document.getElementById("mode_select").value = g_widget_attr.current_mode.toString();
@@ -95,10 +95,10 @@ async function refreshDecksList() {
     }
     g_deck_list_temp = decksResponse;
     // 载入牌组选择
-    // console.debug(decksResponse);
+    // debugPush(decksResponse);
     document.getElementById("deck_choice").value = g_widget_attr.target_deck_id;
     pushLogF(language["info_loaded_decks_info"]);
-    // setTimeout(()=>{console.log(document.decklist.select_deck.checked)}, 10000);
+    // setTimeout(()=>{logPush(document.decklist.select_deck.checked)}, 10000);
 }
 
 /**
@@ -149,7 +149,7 @@ async function setWidgetConfig() {
     if (response != 0) {
         throw Error(language["writeAttrFailed"]);
     }
-    console.debug("写入挂件属性", attrString);
+    debugPush("写入挂件属性", attrString);
 }
 
 /**
@@ -181,8 +181,8 @@ function getOpenDocIds() {
             openedDocIds.push(elem.getAttribute("data-node-id"));
         }
     });
-    console.debug("已开启文档定位元素", window.top.document.querySelectorAll(".protyle.fn__flex-1 .protyle-background"));
-    console.debug("已开启文档id", openedDocIds);
+    debugPush("已开启文档定位元素", window.top.document.querySelectorAll(".protyle.fn__flex-1 .protyle-background"));
+    debugPush("已开启文档id", openedDocIds);
     return openedDocIds;
 }
 
@@ -283,7 +283,7 @@ async function checkAdd() {
             break;
         }
     }
-    console.debug("获取基本信息", scanAttr);
+    debugPush("获取基本信息", scanAttr);
     let blockInfos, deckId;
     // 传入项目：目前选择的牌组id；所有牌组信息；所在文档（正在打开的文档）；所有已打开的文档
     try{
@@ -300,7 +300,7 @@ async function checkAdd() {
     let tableElem = document.getElementById("preview_table");
     // tableElem.innerHTML = "";
     tableElem.innerHTML = `<tr>
-    <th>${language["ui_table_id"]}</th>
+    <th class="preview-item-id">${language["ui_table_id"]}</th>
     <th>${language["ui_table_content_preview"]}</th>
     <th>${language["ui_table_operation"]}</th>
 </tr>`;
@@ -378,13 +378,13 @@ async function doAdd() {
         return;
     }
     
-    console.log("将添加的块ids", blockIds);
+    logPush("将添加的块ids", blockIds);
     // return;
     // 执行加入闪卡
     let afterAddSize = await addRiffCards(blockIds, deckId);
     pushLogF(language["info_batch_add_done"], blockIds.length, afterAddSize - selectDeckInfo.size);
     
-    console.log(blockIds);
+    logPush(blockIds);
 }
 
 /**
@@ -448,7 +448,7 @@ async function doAdd() {
     
     // TODO: 可选择的传入项目：目前选择的牌组id；所有牌组信息；所在文档（正在打开的文档）；所有已打开的文档
     let [blockInfos, deckId] = await g_my_mode.scan(scanAttr);
-    console.log("scan返回", blockInfos, deckId);
+    logPush("scan返回", blockInfos, deckId);
     // return;
     if (!isValidStr(blockInfos) || blockInfos.length <= 0) {
         pushLogF(language["hint_block_not_found"]);
@@ -461,7 +461,7 @@ async function doAdd() {
     let blockIds = blockInfos.map((value) => {
         return value.id;
     });
-    console.log("提取id", blockIds);
+    logPush("提取id", blockIds);
     // 执行加入闪卡
     return;
     let afterAddSize = await addRiffCards(blockIds, deckId);

@@ -62,7 +62,7 @@ let zh_CN = {
     mode4_input_tag_name: "标签全称：",
     mode4_except_exist: "排除已被制卡的块",
     // 模式简要介绍词 introductions for modes
-    mode1_introduction: "将当前文档的所有指定标题添加为闪卡。<br/><em>注：为了使用标题复习，仍需要高亮标题下内容，或手动折叠标题块。</em>",
+    mode1_introduction: "将当前文档的所有指定标题添加为闪卡。<br/><em>注：为了使用标题复习，仍需要高亮标题下内容，或开启标题块制卡。</em>",
     mode2_introduction: "将当前文档的所有超级块添加为闪卡",
     mode3_introduction: `通过SQL将符合条件的块添加为闪卡<br/>
             支持部分关键词：

@@ -26,7 +26,7 @@ export function isSafelyUpdate(thisDocId, customConfig = null) {
             }
         }
     }
-    // console.log($(window.top.document).find(".b3-dialog--open #historyContainer")); // 防止历史预览界面刷新
+    // logPush($(window.top.document).find(".b3-dialog--open #historyContainer")); // 防止历史预览界面刷新
     try{
         // 判定历史预览页面 history
         // $(window.top.document).find(".b3-dialog--open #historyContainer").length >= 1
@@ -49,8 +49,8 @@ export function isSafelyUpdate(thisDocId, customConfig = null) {
         }
         // 判定文档已打开&只读模式【挂件所在文档在窗口中，且页面为编辑状态，则放行】
         // 只读模式判定警告：若在闪卡页面，且后台开启了当前文档（编辑模式），只读不会拦截
-        // console.log($(window.top.document).find(`.protyle-background[data-node-id="${thisDocId}"] ~ .protyle-wysiwyg`).attr("contenteditable") == "false");
-        // console.log($(window.top.document).find(`.protyle-background[data-node-id="${thisDocId}"] ~ .protyle-wysiwyg`));
+        // logPush($(window.top.document).find(`.protyle-background[data-node-id="${thisDocId}"] ~ .protyle-wysiwyg`).attr("contenteditable") == "false");
+        // logPush($(window.top.document).find(`.protyle-background[data-node-id="${thisDocId}"] ~ .protyle-wysiwyg`));
         // $(window.top.document).find(`.protyle-background[data-node-id="${thisDocId}"] ~ .protyle-wysiwyg`)
         let candidateThisDocEditor = window.top.document.querySelector(`.protyle-background[data-node-id="${thisDocId}"] ~ .protyle-wysiwyg`);
         if (!isValidStr(candidateThisDocEditor) || candidateThisDocEditor.length <= 0) {
@@ -125,4 +125,51 @@ export function transfromAttrToIAL(attrData) {
     result += "}";
     if (result == "{:}") return null;
     return result;
+}
+
+
+// debug push
+let g_DEBUG = 2;
+const g_NAME = "barc";
+const g_FULLNAME = "批量添加闪卡";
+
+/*
+LEVEL 0 忽略所有
+LEVEL 1 仅Error
+LEVEL 2 Err + Warn
+LEVEL 3 Err + Warn + Info
+LEVEL 4 Err + Warn + Info + Log
+LEVEL 5 Err + Warn + Info + Log + Debug
+*/
+export function commonPushCheck() {
+    if (window.top["OpaqueGlassDebugV2"] == undefined || window.top["OpaqueGlassDebugV2"][g_NAME] == undefined) {
+        return g_DEBUG;
+    }
+    return window.top["OpaqueGlassDebugV2"][g_NAME];
+}
+
+export function debugPush(str, ...args) {
+    pushDebug(str);
+    if (commonPushCheck() >= 5) {
+        console.debug(`${g_FULLNAME}[D] ${new Date().toLocaleString()} ${str}`, ...args);
+    }
+}
+
+export function logPush(str, ...args) {
+    pushDebug(str);
+    if (commonPushCheck() >= 4) {
+        console.log(`${g_FULLNAME}[L] ${new Date().toLocaleString()} ${str}`, ...args);
+    }
+}
+
+export function errorPush(str, ... args) {
+    if (commonPushCheck() >= 1) {
+        console.error(`${g_FULLNAME}[E] ${new Date().toLocaleString()} ${str}`, ...args);
+    }
+}
+
+export function warnPush(str, ... args) {
+    if (commonPushCheck() >= 2) {
+        console.warn(`${g_FULLNAME}[W] ${new Date().toLocaleString()} ${str}`, ...args);
+    }
 }

@@ -161,3 +161,7 @@ body {
 .app {
     width: 100%;
 }
+
+.preview-item-id {
+    cursor: pointer;
+}

@@ -3,7 +3,7 @@
  * 用于发送思源api请求。
  */
 import {token, setting} from "./config.js";
-import { isValidStr } from "./common.js";
+import { debugPush, isValidStr, logPush } from "./common.js";
 /**向思源api发送请求
  * @param data 传递的信息（body）
  * @param url 请求的地址
@@ -259,7 +259,7 @@ export async function getCurrentDocIdF(){
         let queryResult = await queryAPI("SELECT root_id as parentId FROM blocks WHERE id = '" + thisWidgetId + "'");
         console.assert(queryResult != null && queryResult.length == 1, "SQL查询失败", queryResult);
         if (queryResult!= null && queryResult.length >= 1){
-            console.debug("获取当前文档idBy方案A"+queryResult[0].parentId);
+            debugPush("获取当前文档idBy方案A"+queryResult[0].parentId);
             return queryResult[0].parentId;
         }
     }
@@ -269,7 +269,7 @@ export async function getCurrentDocIdF(){
             //通过获取挂件所在页面题头图的data-node-id获取文档id【安卓下跳转返回有问题，原因未知】
             let thisDocId = window.top.document.querySelector(`div.protyle-content:has(.iframe[data-node-id="${thisWidgetId}"]) .protyle-background`).getAttribute("data-node-id");
             if (isValidStr(thisDocId)){
-                console.debug("获取当前文档idBy方案B" + thisDocId);
+                debugPush("获取当前文档idBy方案B" + thisDocId);
                 return thisDocId;
             }
         }
@@ -282,7 +282,7 @@ export async function getCurrentDocIdF(){
     if (!isValidStr(thisWidgetId)){
         try{
             thisDocId = window.top.document.querySelector(".layout__wnd--active .protyle.fn__flex-1:not(.fn__none) .protyle-background").getAttribute("data-node-id");
-            console.debug("获取当前文档idBy方案C" + thisDocId);
+            debugPush("获取当前文档idBy方案C" + thisDocId);
         }catch(err){
             console.warn("获取当前文档id均失败");
             return null;
@@ -384,7 +384,7 @@ export async function addRiffCards(ids, deckId, oldCardsNum = -1) {
     };
     let response = await postRequest(postBody, url);
     if (response.code == 0 && response.data != null && "size" in response.data) {
-        console.log(response.data);
+        logPush(response.data);
         if (oldCardsNum < 0) {
             return response.data.size;
         }else{
@@ -410,7 +410,7 @@ export async function removeRiffCards(ids, deckId, oldCardsNum = -1) {
     };
     let response = await postRequest(postBody, url);
     if (response.code == 0 && response.data != null && "size" in response.data) {
-        console.log(response.data);
+        logPush(response.data);
         if (oldCardsNum < 0) {
             return response.data.size;
         }else{

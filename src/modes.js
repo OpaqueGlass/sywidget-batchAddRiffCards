@@ -1,4 +1,5 @@
 import { getCurrentDocIdF, queryAPI } from "./API.js";
+import { logPush } from "./common.js";
 import { language, setting } from "./config.js";
 import { tabHandler } from "./uncommon.js";
 
@@ -7,7 +8,7 @@ class ModeExample {
     id = -1;
     // 模式所需要的初始化工作，包括向模式设置区
     init() {
-        console.log("INIT");
+        logPush("INIT");
     }
     // 移除模式时所做的工作
     destory() {
@@ -44,7 +45,7 @@ class HeadingMode extends ModeExample{
         </select>
         <br/>
         <span>${language["mode1_include_child_docs"]}</span><input type="checkbox" id="mode_include_child_doc" />`;
-        console.log("INIT标题模式");
+        logPush("INIT标题模式");
     }
     // 移除模式时所做的工作
     destory() {
@@ -83,7 +84,7 @@ class SuperBlockMode extends ModeExample {
         <span>${language["mode1_include_child_docs"]}</span><input type="checkbox" id="mode_include_child_doc" />
         <span>${language["mode2_match_qa_pattern"]}</span><input type="checkbox" id="mode_match_qa_pattern" />
         `;
-        console.log("INIT超级块模式");
+        logPush("INIT超级块模式");
     }
     // 执行，请返回要被创建为闪卡的块信息数组
     async scan(scanAttr) {
@@ -99,7 +100,7 @@ class SQLMode extends ModeExample {
     id = 3;
     // 模式所需要的初始化工作，包括向模式设置区
     init() {
-        console.log("INITSQL模式");
+        logPush("INITSQL模式");
         let containerElem = document.getElementById("mode_config_container");
         containerElem.innerHTML = `<textarea id="mode_user_sql" rows="7" cols="66" placeholder="在此输入SQL / Input SQL here"></textarea>`;
         document.getElementById("mode_user_sql").addEventListener("keydown", tabHandler);
@@ -125,7 +126,7 @@ class SQLMode extends ModeExample {
         sqlStmt = sqlStmt.replace(new RegExp("@ALL_OPEN_DOC@", "g")
                 // 在RegExp初始化中，使用字符串初始化时，注意正则表达式中的\应当在字符串中转义（用\\）
                 , `${JSON.stringify(scanAttr.openedDocIds).replace(new RegExp("[\\[\\]]", "g"), "")}`);
-        console.log("SQL:", sqlStmt);
+        logPush("SQL:", sqlStmt);
         let queryResult = await queryAPI(sqlStmt);
         return [queryResult, undefined];
     }
@@ -140,7 +141,7 @@ class TagMode extends ModeExample {
         let containerElem = document.getElementById("mode_config_container");
         containerElem.innerHTML = `<span>${language["mode4_input_tag_name"]}</span><input type="text" id="mode_tag_name"></input>
         <span>${language["mode4_except_exist"]}</span><input id="mode_except_exist" type="checkbox"></input>`;
-        console.log("INIT标签模式");
+        logPush("INIT标签模式");
     }
     // 移除模式时所做的工作
     destory() {
@@ -166,7 +167,7 @@ class TagMode extends ModeExample {
             sqlSnip = `and ial not like "%custom-riff-decks%"`;
         }
         let queryResult = await queryAPI(`select * from blocks where tag like "%#${tagName}#%" ${sqlSnip} and parent_id not in (select id from blocks where tag like "%#${tagName}#%")`);
-        console.log(queryResult);
+        logPush(queryResult);
         return [queryResult, undefined];
     }
 }
@@ -182,7 +183,7 @@ class HighLightMode extends ModeExample {
         containerElem.innerHTML = `
         <span>${language["mode1_include_child_docs"]}</span><input type="checkbox" id="mode_include_child_doc" />
         `;
-        console.log("INIT高亮标记模式");
+        logPush("INIT高亮标记模式");
     }
     // 载入模式内部设置
     load(modeSettings) {
@@ -206,15 +207,15 @@ class HighLightMode extends ModeExample {
         let finalResult = new Array();
         queryResult.forEach((oneResult) => {
             let oneContent = oneResult.markdown;
-            // console.log(`[正则检查]原内容`, oneContent);
+            // logPush(`[正则检查]原内容`, oneContent);
             oneContent = oneContent.replace(new RegExp("(?!<\\\\)`[^`]*`(?!`)", "g"), "");
-            // console.log(`[正则检查]移除行内代码`, oneContent);
+            // logPush(`[正则检查]移除行内代码`, oneContent);
             let regExp = new RegExp("(?<!\\\\)==[^=]*[^\\\\]==");
-            // console.log(`[正则检查]重新匹配高亮`, oneContent.match(regExp));
+            // logPush(`[正则检查]重新匹配高亮`, oneContent.match(regExp));
             if (oneContent.match(regExp) != null) {
                 finalResult.push(oneResult);
             }else{
-                console.log(`[正则检查]认为【${oneResult.markdown}】不是高亮，\n（移除行内代码后 【${oneContent}】 ）`)
+                logPush(`[正则检查]认为【${oneResult.markdown}】不是高亮，\n（移除行内代码后 【${oneContent}】 ）`)
             }
         });
         return [finalResult, undefined];
@@ -231,7 +232,7 @@ class ListItemQAFormatMode extends ModeExample {
         containerElem.innerHTML = `
         <span>${language["mode1_include_child_docs"]}</span><input type="checkbox" id="mode_include_child_doc" />
         `;
-        console.log("INIT列表QA模式");
+        logPush("INIT列表QA模式");
     }
     // 载入模式内部设置
     load(modeSettings) {
