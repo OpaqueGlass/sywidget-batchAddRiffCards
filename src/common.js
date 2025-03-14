@@ -149,14 +149,12 @@ export function commonPushCheck() {
 }
 
 export function debugPush(str, ...args) {
-    pushDebug(str);
     if (commonPushCheck() >= 5) {
         console.debug(`${g_FULLNAME}[D] ${new Date().toLocaleString()} ${str}`, ...args);
     }
 }
 
 export function logPush(str, ...args) {
-    pushDebug(str);
     if (commonPushCheck() >= 4) {
         console.log(`${g_FULLNAME}[L] ${new Date().toLocaleString()} ${str}`, ...args);
     }
